@@ -23,7 +23,8 @@ pid_t parse_args(int argc, char **argv) {
 	if (optind < argc) {
 		if (posix_spawn(&pid, argv[optind], NULL, NULL, argv + optind, environ) != 0) {
 			perror("posix spawn failed");
-			return EXIT_FAILURE;
+			exit(0);
+
 		} else {
 			return pid;
 		}
@@ -31,16 +32,17 @@ pid_t parse_args(int argc, char **argv) {
 
 }
 
-void PrintHex(unsigned char *data) {
+void PrintHex(unsigned char *data, void *address) {
+	printf("%p ", address);
 	for (int i = 0; i < 16; i++) {
-        	printf("%02X", data[i]); // print one byte
-        	if (i == 7) {
-            		printf(" ");        // space after first 8
+        	printf("%02x", data[i]); // print one byte
+	       	if (i == 7) {
+            		printf(" -- ");        // space after first 8
         	} else {
             		printf(" ");
         	}
     }
-    printf("\n");
+    	printf("\n");
 }
 
 
@@ -56,6 +58,8 @@ int main(int argc, char **argv) {
 	}
 	printf("PID : %d\n", (int)pid);
 	Memory(pid);
-	puts("Memory Visualizer Is Finished");
+	puts("[-] Memory Visualizer Is Finished");
 	return 0;
 }
+
+
