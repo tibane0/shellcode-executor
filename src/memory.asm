@@ -34,7 +34,19 @@ Memory:
 	
 	mov [pid], rdi
 
+.ptrace_attach:
 	; ptrace_attach = 16
+	mov rax, 101
+	mov rdi, 16
+	lea rsi, [pid]
+	xor rdx, rdx
+	xor r10, r10
+	syscall
+
+	cmp rax, 0
+	jl .done
+	
+.ptrace_getregs:
 	mov rax, 101
 	mov rdi, 12; ; PTRACE_GETREGS
 	mov rsi, [pid]
@@ -42,51 +54,71 @@ Memory:
 	xor r10, r10
 	syscall
 
-	cmp rax, -1
-	je .done
+	cmp rax, 0
+	jl .detach
 
+	; print -- stack --
 	mov rax, 1
 	mov rdi, 1
 	mov rsi, msg_stack
 	mov rdx, stack_len
 	syscall
 
-	xor rcx, rcx
-	;mov r8, [regs+19*8] 
 .DUMP_STACK:
+	xor rcx, rcx
+	mov r8, [regs+19*8]
+
+.stack_loop:
 	cmp rcx, [dump_size]
 	jge .done
 
+.ptrace_peekdata_1:
 	; dump stack
-
-
 	mov rax, 101
 	mov rdi, 2 ; PTRACE_PEEKDATA
 	mov rsi, [pid]
-	mov rdx, [r8+rcx] ; [regs + 19*8] ; rsp
+	lea rdx, [r8+rcx] ; [regs + 19*8] ; rsp
 	xor r10, r10
 	syscall
 	
+	cmp rax, 0
+	jl .detach
 	; store first 8 bytes
 	mov [dumped], rax
 
+.ptrace_peekdata_2:
 	mov rax, 101
 	mov rdi, 2
 	mov rsi, [pid]
+	lea rdx, [r8+rcx]
+	add rdx, 8
 	xor r10, r10
 	syscall
+
+	cmp rax, 0
+	jl .detach
 	
 	; store second 8 bytes
 	mov [dumped+8], rax
 	
 	; output
 	lea rdi, [dumped]
+	mov rsi, dumped 
 	call PrintHex
 
 	add rcx, 16
-	jmp .DUMP_STACK
+	jmp .stack_loop
 	
+.detach:
+	mov rax, 101
+	mov rdi, 17
+	mov rsi, [pid]
+	xor rdx, rdx
+	xor r10, r10
+	syscall
+
 .done:	
+	; print -- done stack --
 	mov rax, 1
 	mov rdi, 1
 	mov rsi, done_stack
@@ -97,4 +129,3 @@ Memory:
 	mov rsp, rbp
 	pop rbp
 	ret
-
