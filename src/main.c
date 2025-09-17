@@ -56,7 +56,7 @@ int main(int argc, char **argv) {
 		puts("INVALID PID");
 		return EXIT_FAILURE;
 	}
-	printf("PID : %d\n", (int)pid);
+	printf("[+] PID : %d\n", (int)pid);
 	Memory(pid);
 	puts("[-] Memory Visualizer Is Finished");
 	return 0;
