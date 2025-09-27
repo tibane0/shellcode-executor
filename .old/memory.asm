@@ -6,7 +6,7 @@ section .data
 	done_stack db "-- DONE STACK -- ", 0xa
 	dstack_len equ $ - done_stack
 	
-	 err_attach   db "ptrace attach failed", 0x0A
+	err_attach   db "ptrace attach failed", 0x0A
     	err_attach_len equ $ - err_attach
     	err_getregs  db "ptrace getregs failed", 0x0A
     	err_getregs_len equ $ - err_getregs
@@ -47,19 +47,28 @@ Memory:
 	xor r10, r10
 	syscall
 
-	cmp rax, 0
-	jl .err_attach
-	
+	;cmp rax, 0
+	;jl .err_attach
+
+
+.waitpid:
+	mov rax, 61
+	mov rdi, [pid]
+	mov rsi, 0
+	xor rdx, rdx
+	syscall
+
+
 .ptrace_getregs:
 	mov rax, 101
 	mov rdi, 12; ; PTRACE_GETREGS
-	mov rsi, [pid]
+i	mov rsi, [pid]
 	lea rdx, [regs]
 	xor r10, r10
 	syscall
 
-	cmp rax, 0
-	jl .err_getregs
+	;cmp rax, 0
+	;jl .err_getregs
 
 	; print -- stack --
 	mov rax, 1
@@ -87,8 +96,8 @@ Memory:
 	xor r10, r10
 	syscall
 	
-	cmp rax, 0
-	jl .detach
+	;cmp rax, 0
+	;jl .detach
 	
 	; store first 8 bytes
 	mov [dumped], rax
@@ -104,8 +113,8 @@ Memory:
 	xor r10, r10
 	syscall
 
-	cmp rax, 0
-	jl .detach
+	;cmp rax, 0
+	;jl .detach
 	
 	; store second 8 bytes
 	mov [dumped+8], rax
