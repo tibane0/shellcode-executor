@@ -1,9 +1,8 @@
 # Shellcode Executor/ Tester
 
-This is a project meant for learning x86_64 assembly and linux internals: a small tool to load, run and analyze raw shellcode in a controlled environment.
+This is a project meant for learning C++ and linux internals: a small tool to load, run and analyze raw shellcode in a controlled environment.
 
 ## Goals 
-- Learn assembly `(x86_64)` by doing.
 - Work with linux syscalls:
 	- Memory management
 	- Process control
